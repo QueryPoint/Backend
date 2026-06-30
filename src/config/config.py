@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class CORS(BaseModel):
     origins: list[str] = []
@@ -35,6 +35,8 @@ class JWT(BaseModel):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
 class Config(BaseSettings):
+    model_config = SettingsConfigDict(toml_file="config.toml")
+
     database: Database = Database()
     cors: CORS = CORS()
     s3: S3 = S3()
