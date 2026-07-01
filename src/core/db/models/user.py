@@ -1,10 +1,13 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, String, text, Enum
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import DateTime, String, text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.db.database import Base
+if TYPE_CHECKING:
+    from src.core.db.models.documents import Document
 
 class User(Base):
     __tablename__ = "users"
@@ -15,4 +18,10 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         server_default=text("TIMEZONE('utc', NOW())"),
+        nullable=False,
+    )
+
+    documents: Mapped[list["Document"]] = relationship(
+        back_populates="owner",
+        cascade="all, delete-orphan",
     )

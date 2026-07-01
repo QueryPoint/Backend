@@ -7,14 +7,13 @@ def set_auth_cookies(
     access_token: str,
     refresh_token: str,
 ) -> None:
-
     response.set_cookie(
         key="access_token",
         value=access_token,
         httponly=True,
         secure=False,
         samesite="lax",
-        max_age=config.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        max_age=config.jwt.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         path="/",
     )
 
@@ -24,7 +23,7 @@ def set_auth_cookies(
         httponly=True,
         secure=False,
         samesite="lax",
-        max_age=config.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
+        max_age=config.jwt.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
         path="/api/v1/refresh",
     )
 
@@ -33,14 +32,13 @@ def set_access_cookie(
     response: Response,
     access_token: str,
 ) -> None:
-
     response.set_cookie(
         key="access_token",
         value=access_token,
         httponly=True,
         secure=False,
         samesite="lax",
-        max_age=config.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        max_age=config.jwt.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         path="/",
     )
 

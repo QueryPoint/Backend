@@ -1,5 +1,10 @@
 from pydantic import BaseModel
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import (
+    BaseSettings,
+    SettingsConfigDict,
+    PydanticBaseSettingsSource,
+    TomlConfigSettingsSource,
+)
 
 class CORS(BaseModel):
     origins: list[str] = []
@@ -29,10 +34,13 @@ class S3(BaseModel):
     REGION: str = "ru-central1"
 
 class JWT(BaseModel):
-    SECRET_KEY: str = "change-me-in-production"
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
-    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    SECRET_KEY: str = ""
+    ALGORITHM: str = ""
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 0
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 0
+
+class ElasticSearch(BaseModel):
+    URL: str = ""
 
 class Config(BaseSettings):
     model_config = SettingsConfigDict(toml_file="config.toml")
@@ -41,5 +49,18 @@ class Config(BaseSettings):
     cors: CORS = CORS()
     s3: S3 = S3()
     jwt: JWT = JWT()
+    elasticsearch: ElasticSearch = ElasticSearch()
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls,
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
+        return (TomlConfigSettingsSource(settings_cls),)
+
 
 config = Config()
