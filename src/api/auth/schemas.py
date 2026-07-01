@@ -1,4 +1,5 @@
 import re
+from uuid import UUID
 from pydantic import BaseModel, Field, field_validator
 
 class UserRegisterRequest(BaseModel):
@@ -12,10 +13,6 @@ class UserRegisterRequest(BaseModel):
             raise ValueError("Only latin letters, digits and underscores are allowed")
         if not value[0].isalpha():
             raise ValueError("Username must start with a letter")
-        if value.endswith("_"):
-            raise ValueError("Username must not end with an underscore")
-        if "__" in value:
-            raise ValueError("Username must not contain consecutive underscores")
         return value
 
 class UserLoginRequest(BaseModel):
@@ -23,15 +20,28 @@ class UserLoginRequest(BaseModel):
     password: str
 
 class UserResponse(BaseModel):
-    user_id: str
-    username: str
-
     model_config = {"from_attributes": True}
 
-class UserProfileResponse(BaseModel):
-    user_id: str
+    user_id: UUID
     username: str
 
 class StatusResponse(BaseModel):
+    model_config = {"from_attributes": True}
+
     status: str
 
+class DocumentResponse(BaseModel):
+    model_config = {"from_attributes": True}
+
+    doc_id: UUID
+    doc_name: str
+    doc_viewlink: str
+    doc_size: int
+    doc_type: str
+
+class UserProfileResponse(BaseModel):
+    model_config = {"from_attributes": True}
+
+    user_id: UUID
+    username: str
+    documents: list[DocumentResponse]

@@ -9,7 +9,7 @@ from src.api.auth.security import (
     create_access_token, create_refresh_token, decode_token,
 )
 from src.api.auth.cookies import clear_auth_cookies
-from src.core.db.dto.dto import UserDTO, UserProfileDTO, StatusDTO, AuthDTO
+from src.core.db.dto.userDTO import UserDTO, UserProfileDTO, StatusDTO, AuthDTO
 
 
 class AuthService:
@@ -19,13 +19,11 @@ class AuthService:
     async def register(self, username: str, password: str) -> UserDTO:
         if await self.uow.user.get_by_username(username):
             raise UsernameTaken
+
         result = await self.uow.user.create(
             username=username,
             password_hash=await hash_password(password),
         )
-
-        create_access_token(result.user_id)
-        create_refresh_token(result.user_id)
 
         return UserDTO(user_id=result.user_id, username=result.username)
 
@@ -44,7 +42,7 @@ class AuthService:
             user_id=user.user_id,
             username=user.username,
             access_token=access_token,
-            refresh_token=refresh_token
+            refresh_token=refresh_token,
         )
 
     async def refresh(self, refresh_token: str) -> str:
@@ -61,18 +59,19 @@ class AuthService:
         clear_auth_cookies(response)
         return StatusDTO(status="logged_out")
 
-
-    async def get_profile(self, access_token: str) -> UserProfileDTO:
+    async def get_profile(self, access_token: str, limit: int, offset: int) -> UserProfileDTO:
         user_id = self._get_user_id(access_token)
 
         user = await self.uow.user.get_by_id(user_id)
-
         if not user:
-            raise UserNotFound
+            raise Unauthed
+
+        documents = await self.uow.document.list(user_id, limit, offset)
 
         return UserProfileDTO(
             user_id=user.user_id,
-            username=user.username
+            username=user.username,
+            documents=documents,
         )
 
     def _get_user_id(self, access_token: str) -> UUID:
@@ -82,4 +81,5 @@ class AuthService:
         payload = decode_token(access_token)
         if not payload or payload.get("type") != "access":
             raise Unauthed
+
         return UUID(payload["sub"])

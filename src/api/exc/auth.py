@@ -2,7 +2,7 @@ from fastapi import HTTPException, status
 
 class Unauthed(HTTPException):
     def __init__(self) -> None:
-        super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
+        super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
 
 class UsernameTaken(HTTPException):
     def __init__(self) -> None:
