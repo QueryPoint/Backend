@@ -11,7 +11,7 @@ class Base(DeclarativeBase):
     pass
 
 engine = create_async_engine(
-    config.database.async_database_url,  # ← изменено!
+    config.database.async_database_url,
     echo=True,
     pool_pre_ping=True,
 )
