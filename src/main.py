@@ -4,12 +4,16 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.core.db.database import engine
-from src.api.auth.router import router
+from src.api.auth.router import router as auth_router
+from src.core.elasticsearch.es_servise import elastic_service
+from src.api.documents.router import router as documents_router
+from src.core.db.database import engine, init_models
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    await init_models()
+    await elastic_service.init_index()
     try:
         yield
     finally:
@@ -29,7 +33,8 @@ app.add_middleware(
     allow_credentials=True,
 )
 
-app.include_router(router, prefix="/api/v1")
+app.include_router(auth_router)
+app.include_router(documents_router)
 
 
 @app.get("/")
