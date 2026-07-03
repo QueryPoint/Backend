@@ -4,17 +4,15 @@
 # When running locally (e.g. for migrations) use localhost.
 
 [database]
-postgres_host     = "querypoint_postgres"   # localhost when running outside Docker
+postgres_host     = "querypoint_postgres"
 postgres_port     = 5432
 postgres_username = "querypoint"
 postgres_password = "change-me"
 postgres_db       = "backend_db"
-# alembic_postgres_host is used only for migrations run from the host machine
 alembic_postgres_host = "localhost"
 
 [s3]
-# MinIO endpoint — use container name inside Docker, localhost outside
-ENDPOINT_URL      = "http://querypoint_minio:9000"
+ENDPOINT_URL      = "http://minio:9000"
 ACCESS_KEY_ID     = "querypoint"
 ACCESS_SECRET_KEY = "change-me"
 BUCKET_NAME       = "query-point"
@@ -25,6 +23,20 @@ SECRET_KEY                  = "change-me-use-a-long-random-string"
 ALGORITHM                   = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 REFRESH_TOKEN_EXPIRE_DAYS   = 7
+
+[elasticsearch]
+URL = "http://querypoint_elasticsearch:9200"
+
+[redis]
+HOST     = "querypoint_redis"
+PORT     = 6379
+PASSWORD = "change-me"
+
+[rabbitmq]
+HOST = "querypoint_rabbitmq"
+PORT = 5672
+USER = "guest"
+PASSWORD = "guest"
 
 [cors]
 origins = [

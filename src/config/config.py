@@ -42,6 +42,25 @@ class JWT(BaseModel):
 class ElasticSearch(BaseModel):
     URL: str = ""
 
+class Redis(BaseModel):
+    HOST: str = ""
+    PORT: int = 6379
+    PASSWORD: str = ""
+
+    @property
+    def url(self) -> str:
+        return f"redis://:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.DB}"
+
+class RabbitMQ(BaseModel):
+    HOST: str = "querypoint_rabbitmq"
+    PORT: int = 5672
+    USER: str = "guest"
+    PASSWORD: str = "guest"
+
+    @property
+    def url(self) -> str:
+        return f"amqp://{self.USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/"
+
 class Config(BaseSettings):
     model_config = SettingsConfigDict(toml_file="config.toml")
 
@@ -50,6 +69,8 @@ class Config(BaseSettings):
     s3: S3 = S3()
     jwt: JWT = JWT()
     elasticsearch: ElasticSearch = ElasticSearch()
+    redis: Redis = Redis()
+    rabbitmq: RabbitMQ = RabbitMQ()
 
     @classmethod
     def settings_customise_sources(
