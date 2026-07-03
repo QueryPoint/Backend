@@ -25,3 +25,8 @@ class User(Base):
         back_populates="owner",
         cascade="all, delete-orphan",
     )
+
+    search_history: Mapped[list["SearchHistory"]] = relationship(  # ← вернуть эту связь
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
