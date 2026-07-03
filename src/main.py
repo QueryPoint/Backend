@@ -19,6 +19,7 @@ from src.core.rabbitmq.to_back import start_consumer
 async def lifespan(app: FastAPI):
     await init_models()
     await elastic_service.init_index()
+    await rabbitmq_client.connect()
     await start_consumer()
     try:
         yield
