@@ -6,18 +6,26 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.auth.router import router as auth_router
 from src.core.elasticsearch.es_servise import elastic_service
+from src.core.redis.redis_service import redis_service
 from src.api.documents.router import router as documents_router
+from src.api.search.router import router as search_router
+from src.api.ws.router import router as ws_router
 from src.core.db.database import engine, init_models
+from src.core.rabbitmq.client import rabbitmq_client
+from src.core.rabbitmq.to_back import start_consumer
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_models()
     await elastic_service.init_index()
+    await start_consumer()
     try:
         yield
     finally:
         await engine.dispose()
+        await redis_service.client.aclose()
+        await rabbitmq_client.close()
 
 
 app = FastAPI(
@@ -35,6 +43,8 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(documents_router)
+app.include_router(search_router)
+app.include_router(ws_router)
 
 
 @app.get("/")
