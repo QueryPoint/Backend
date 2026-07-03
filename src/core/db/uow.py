@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.db.repositories.user import UserRepository
 from src.core.db.repositories.documents import DocRepository
+from src.core.db.repositories.searchHistory import SearchHistoryRepository
 from src.core.db.database import get_session
 
 
@@ -13,6 +14,7 @@ class UnitOfWork:
         self.session = session
         self.user = UserRepository(self.session)
         self.document = DocRepository(self.session)
+        self.search_history = SearchHistoryRepository(self.session)
 
     async def commit(self) -> None:
         await self.session.commit()
