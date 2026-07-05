@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from src.api.auth.router import router as auth_router
 from src.core.elasticsearch.es_servise import elastic_service
@@ -46,6 +47,8 @@ app.include_router(auth_router)
 app.include_router(documents_router)
 app.include_router(search_router)
 app.include_router(ws_router)
+
+Instrumentator().instrument(app).expose(app, endpoint="/metrics", include_in_schema=False)
 
 
 @app.get("/")
