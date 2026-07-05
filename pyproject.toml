@@ -55,4 +55,5 @@ test = [
     "httpx>=0.28,<1",
     "websocket-client>=1.8,<2",
     "locust>=2.32,<3",
+    "pytest-playwright>=0.7,<1",
 ]
