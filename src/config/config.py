@@ -46,6 +46,7 @@ class Redis(BaseModel):
     HOST: str = ""
     PORT: int = 6379
     PASSWORD: str = ""
+    DB: int = 0
 
     @property
     def url(self) -> str:

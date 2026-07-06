@@ -84,9 +84,11 @@ class ElasticService:
             )
         await self.client.indices.refresh(index=self.index)
 
-    async def search(self, user_id: UUID, query: str) -> list[dict]:
+    async def search(self, user_id: UUID, query: str, limit: int = 10, offset: int = 0) -> list[dict]:
         response = await self.client.search(
             index=self.index,
+            from_=offset,
+            size=limit,
             body={
                 "query": {
                     "bool": {
@@ -98,7 +100,11 @@ class ElasticService:
                         },
                     }
                 },
-                "highlight": {"fields": {"text": {}}},
+                "highlight": {
+                    "pre_tags": ["<mark>"],
+                    "post_tags": ["</mark>"],
+                    "fields": {"text": {}},
+                },
             },
         )
 

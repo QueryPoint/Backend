@@ -24,12 +24,23 @@ async def test_search_filters_by_current_user_and_uses_highlight(fake_es_client,
     fake_es_client.search.return_value = {"hits": {"hits": [{
         "_score": 7.2,
         "_source": {"file_name": "lecture.pdf", "page_number": 2, "chunk_id": "chunk", "text": "source"},
-        "highlight": {"text": ["<em>source</em>"]},
+        "highlight": {"text": ["<mark>source</mark>"]},
     }]}}
     result = await ElasticService(client=fake_es_client).search(user_id, "source")
-    assert result == [{"file_name":"lecture.pdf","page_number":2,"chunk_id":"chunk","text":"<em>source</em>","score":7.2}]
-    body = fake_es_client.search.await_args.kwargs["body"]
+    assert result == [{"file_name":"lecture.pdf","page_number":2,"chunk_id":"chunk","text":"<mark>source</mark>","score":7.2}]
+    call = fake_es_client.search.await_args
+    body = call.kwargs["body"]
     assert body["query"]["bool"]["filter"]["term"]["user_id"] == str(user_id)
+    assert body["highlight"]["pre_tags"] == ["<mark>"]
+    assert body["highlight"]["post_tags"] == ["</mark>"]
+
+@pytest.mark.asyncio
+async def test_search_paginates_with_limit_and_offset(fake_es_client, user_id):
+    fake_es_client.search.return_value = {"hits": {"hits": []}}
+    await ElasticService(client=fake_es_client).search(user_id, "source", limit=5, offset=15)
+    call = fake_es_client.search.await_args
+    assert call.kwargs["size"] == 5
+    assert call.kwargs["from_"] == 15
 
 @pytest.mark.asyncio
 async def test_delete_chunks_deletes_by_document_id_and_refreshes(fake_es_client):

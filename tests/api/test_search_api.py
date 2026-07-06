@@ -17,6 +17,30 @@ def test_search_requires_query_parameter():
     class Service: pass
     assert client_with(Service()).get('/api/v1/search').status_code==422
 
+def test_search_rejects_empty_query():
+    class Service: pass
+    assert client_with(Service()).get('/api/v1/search?q=').status_code==422
+
+def test_search_passes_limit_and_offset_to_service():
+    received = {}
+    class Service:
+        async def search(self, user_id, q, limit, offset):
+            received['limit'] = limit
+            received['offset'] = offset
+            return []
+    client_with(Service()).get('/api/v1/search?q=sql&limit=5&offset=10')
+    assert received == {'limit': 5, 'offset': 10}
+
+def test_search_defaults_limit_to_ten():
+    received = {}
+    class Service:
+        async def search(self, user_id, q, limit, offset):
+            received['limit'] = limit
+            received['offset'] = offset
+            return []
+    client_with(Service()).get('/api/v1/search?q=sql')
+    assert received == {'limit': 10, 'offset': 0}
+
 def test_search_returns_results_in_contract_shape():
     class Service:
         async def search(self,*a): return [{'file_name':'lecture.pdf','page_number':1,'chunk_id':'chunk','text':'found','score':1.0}]
