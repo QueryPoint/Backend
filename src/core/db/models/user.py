@@ -8,6 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.core.db.database import Base
 if TYPE_CHECKING:
     from src.core.db.models.documents import Document
+    from src.core.db.models.searchHistory import SearchHistory
 
 class User(Base):
     __tablename__ = "users"
@@ -26,7 +27,7 @@ class User(Base):
         cascade="all, delete-orphan",
     )
 
-    search_history: Mapped[list["SearchHistory"]] = relationship(  # ← вернуть эту связь
+    search_history: Mapped[list["SearchHistory"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
     )
