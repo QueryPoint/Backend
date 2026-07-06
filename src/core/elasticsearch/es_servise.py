@@ -4,7 +4,18 @@ from src.core.elasticsearch.client import es_connect
 
 INDEX_NAME = "documents"
 
+ANALYZER_NAME = "ru_analyzer"
+
 MAPPING = {
+    "settings": {
+        "analysis": {
+            "analyzer": {
+                ANALYZER_NAME: {
+                    "type": "russian"
+                }
+            }
+        }
+    },
     "mappings": {
         "properties": {
             "chunk_id":    {"type": "keyword"},
@@ -12,7 +23,7 @@ MAPPING = {
             "user_id":     {"type": "keyword"},
             "file_name":   {"type": "keyword"},
             "page_number": {"type": "integer"},
-            "text":        {"type": "text"},
+            "text":        {"type": "text", "analyzer": ANALYZER_NAME},
         }
     }
 }
@@ -23,8 +34,22 @@ class ElasticService:
         self.index = index
 
     async def init_index(self) -> None:
-        if not await self.client.indices.exists(index=self.index):
-            await self.client.indices.create(index=self.index, body=MAPPING)
+        if await self.client.indices.exists(index=self.index):
+            mapping = await self.client.indices.get_mapping(index=self.index)
+            analyzer = (
+                mapping[self.index]["mappings"]
+                .get("properties", {})
+                .get("text", {})
+                .get("analyzer")
+            )
+            if analyzer == ANALYZER_NAME:
+                return
+            # старый индекс без русского анализатора — пересоздаём.
+            # метаданные документов лежат в PostgreSQL, файлы в S3,
+            # так что документы можно переиндексировать заново.
+            await self.client.indices.delete(index=self.index)
+
+        await self.client.indices.create(index=self.index, body=MAPPING)
 
     @staticmethod
     def _chunk_text(text: str, size: int = 1000, overlap: int = 100) -> list[str]:
