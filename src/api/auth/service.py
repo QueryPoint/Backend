@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import Response
 
 from src.core.db.uow import UnitOfWork
-from src.api.exc.auth import UsernameTaken, Unauthed, UserNotFound
+from src.api.exc.auth import UsernameTaken, Unauthed
 from src.api.auth.security import (
     hash_password, verify_password,
     create_access_token, create_refresh_token, decode_token,
