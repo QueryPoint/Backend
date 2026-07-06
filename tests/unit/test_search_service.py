@@ -24,7 +24,7 @@ async def test_search_calls_es_and_caches_cache_miss(fake_uow, user_id, monkeypa
     monkeypatch.setattr("src.api.search.service.elastic_service.search", es)
     monkeypatch.setattr("src.api.search.service.redis_service.set_json", set_json)
     assert await service.search(user_id, "sql") == [{"result":1}]
-    es.assert_awaited_once_with(user_id=user_id, query="sql")
+    es.assert_awaited_once_with(user_id=user_id, query="sql", limit=10, offset=0)
     assert set_json.await_args.kwargs["ttl"] == SEARCH_CACHE_TTL
 
 def test_cache_key_is_deterministic_and_user_isolated(user_id, other_user_id):
@@ -32,6 +32,7 @@ def test_cache_key_is_deterministic_and_user_isolated(user_id, other_user_id):
     assert a == SearchService._cache_key(user_id, "sql")
     assert a != SearchService._cache_key(other_user_id, "sql")
     assert a != SearchService._cache_key(user_id, "postgres")
+    assert a != SearchService._cache_key(user_id, "sql", limit=10, offset=10)
 
 @pytest.mark.asyncio
 async def test_delete_history_only_for_given_user(fake_uow, user_id):
