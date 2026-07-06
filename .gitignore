@@ -51,3 +51,16 @@ config.toml
 .vscode/
 *.swp
 *.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# uv
+.uv-cache/
+
+data/
+minio_data/
+postgres_data/
+*.db
+
